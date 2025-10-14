@@ -195,7 +195,7 @@
       unique_id: 60f31dd2-7db9-42ed-a592-3abb8e38d7e4
       friendly_name: "Next Off Peak Start"
       value_template: >-
-        {{ state_attr('binary_sensor.octopus_energy_a_7e9f23d1_intelligent_dispatching', 'next_start') }}
+        {{ state_attr('binary_sensor.octopus_energy_electricity_20e5176819_2000052794266_off_peak', 'next_start') }}
 
 - platform: template
   sensors:
@@ -203,7 +203,7 @@
       unique_id: f85d6def-fb51-4064-8052-bb097c2022ba
       friendly_name: "Next Off Peak End"
       value_template: >-
-        {{ state_attr('binary_sensor.octopus_energy_a_7e9f23d1_intelligent_dispatching', 'next_end') }}
+        {{ state_attr('binary_sensor.octopus_energy_electricity_20e5176819_2000052794266_off_peak', 'next_end') }}
 
 - platform: template
   sensors:
@@ -211,7 +211,7 @@
       unique_id: 518bf0a1-c5e3-4bf2-ab24-dbb6c8e774a0
       friendly_name: "Current Off Peak Start"
       value_template: >-
-        {{ state_attr('binary_sensor.octopus_energy_a_7e9f23d1_intelligent_dispatching', 'current_start') }}
+        {{ state_attr('binary_sensor.octopus_energy_electricity_20e5176819_2000052794266_off_peak', 'current_start') }}
 
 - platform: template
   sensors:
@@ -219,7 +219,7 @@
       unique_id: 66081380-0668-415c-9c7e-fcb8533c3e52
       friendly_name: "Current Off Peak End"
       value_template: >-
-        {{ state_attr('binary_sensor.octopus_energy_a_7e9f23d1_intelligent_dispatching', 'current_end') }}
+        {{ state_attr('binary_sensor.octopus_energy_electricity_20e5176819_2000052794266_off_peak', 'current_end') }}
 
 - platform: template
   sensors:

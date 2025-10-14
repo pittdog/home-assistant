@@ -172,7 +172,7 @@
       }}'
     - trigger: state
       entity_id:
-        - binary_sensor.octopus_energy_a_7e9f23d1_intelligent_dispatching
+        - binary_sensor.octopus_energy_electricity_20e5176819_2000052794266_off_peak
       from: 'on'
       to: 'off'
   conditions:
@@ -280,14 +280,14 @@
   triggers:
     - trigger: state
       entity_id:
-        - binary_sensor.octopus_energy_a_7e9f23d1_intelligent_dispatching
+        - binary_sensor.octopus_energy_electricity_20e5176819_2000052794266_off_peak
       from: 'off'
       to: 'on'
       variables:
         tariff: offpeak
     - trigger: state
       entity_id:
-        - binary_sensor.octopus_energy_a_7e9f23d1_intelligent_dispatching
+        - binary_sensor.octopus_energy_electricity_20e5176819_2000052794266_off_peak
       from: 'on'
       to: 'off'
       variables:
@@ -667,7 +667,7 @@
   triggers:
     - trigger: state
       entity_id:
-        - binary_sensor.octopus_energy_a_7e9f23d1_intelligent_dispatching
+        - binary_sensor.octopus_energy_electricity_20e5176819_2000052794266_off_peak
       from: 'off'
       to: 'on'
   conditions:
@@ -724,7 +724,7 @@
   triggers:
     - trigger: state
       entity_id:
-        - binary_sensor.octopus_energy_a_7e9f23d1_intelligent_dispatching
+        - binary_sensor.octopus_energy_electricity_20e5176819_2000052794266_off_peak
       from: 'on'
       to: 'off'
   conditions:
@@ -879,7 +879,7 @@
   triggers:
     - trigger: state
       entity_id:
-        - binary_sensor.octopus_energy_a_7e9f23d1_intelligent_dispatching
+        - binary_sensor.octopus_energy_electricity_20e5176819_2000052794266_off_peak
       from: 'off'
       to: 'on'
   conditions: []
@@ -906,7 +906,7 @@
   triggers:
     - trigger: state
       entity_id:
-        - binary_sensor.octopus_energy_a_7e9f23d1_intelligent_dispatching
+        - binary_sensor.octopus_energy_electricity_20e5176819_2000052794266_off_peak
       from: 'on'
       to: 'off'
     - trigger: state
@@ -946,18 +946,19 @@
       above: 15
   conditions:
     - condition: state
-      entity_id: binary_sensor.octopus_energy_a_7e9f23d1_intelligent_dispatching
+      entity_id: binary_sensor.octopus_energy_electricity_20e5176819_2000052794266_off_peak
       state: 'off'
   actions:
-    - device_id: a33ca33ccb3f9a2cea06a35767048af2
-      domain: mobile_app
-      type: notify
-      message: Spa filled up for first time over 18hrs to heat, so will heat overnight
-      title: Spa first time fill
-    - type: turn_off
-      device_id: b81d1e055479a535ec428ef2f24f44c9
-      entity_id: 89574fa5b8cdc46b734c5cef0184d199
-      domain: switch
+    - action: persistent_notification.create
+      data:
+        notification_id: alert_spa_fill_up
+        title: Spa first time fill
+        message: Spa filled up for first time over 18hrs to heat, so will heat overnight
+    - action: input_boolean.turn_on
+      metadata: { }
+      data: { }
+      target:
+        entity_id: input_boolean.spa_water_top_up
   mode: single
 - id: '1733831577952'
   alias: Spa Heat Up First Time on Off Peak Tariff
@@ -965,7 +966,7 @@
   triggers:
     - trigger: state
       entity_id:
-        - binary_sensor.octopus_energy_a_7e9f23d1_intelligent_dispatching
+        - binary_sensor.octopus_energy_electricity_20e5176819_2000052794266_off_peak
       from: 'off'
       to: 'on'
   conditions:
@@ -1001,7 +1002,7 @@
   triggers:
     - trigger: state
       entity_id:
-        - binary_sensor.octopus_energy_a_7e9f23d1_intelligent_dispatching
+        - binary_sensor.octopus_energy_electricity_20e5176819_2000052794266_off_peak
       from: 'on'
       to: 'off'
   conditions:
@@ -1033,7 +1034,7 @@
       minutes: /5
   conditions:
     - condition: state
-      entity_id: binary_sensor.octopus_energy_a_7e9f23d1_intelligent_dispatching
+      entity_id: binary_sensor.octopus_energy_electricity_20e5176819_2000052794266_off_peak
       state: 'off'
   actions:
     - action: climate.set_temperature
@@ -1108,7 +1109,7 @@
       to: 'on'
   conditions:
     - condition: state
-      entity_id: binary_sensor.octopus_energy_a_7e9f23d1_intelligent_dispatching
+      entity_id: binary_sensor.octopus_energy_electricity_20e5176819_2000052794266_off_peak
       state: 'off'
   actions:
     - type: turn_off
@@ -1127,7 +1128,7 @@
   triggers:
     - trigger: state
       entity_id:
-        - binary_sensor.octopus_energy_a_7e9f23d1_intelligent_dispatching
+        - binary_sensor.octopus_energy_electricity_20e5176819_2000052794266_off_peak
       from: 'off'
       to: 'on'
   conditions:
@@ -1231,7 +1232,7 @@
   triggers:
     - trigger: state
       entity_id:
-        - binary_sensor.octopus_energy_a_7e9f23d1_intelligent_dispatching
+        - binary_sensor.octopus_energy_electricity_20e5176819_2000052794266_off_peak
       from: 'off'
       to: 'on'
   conditions:
@@ -1251,7 +1252,7 @@
   triggers:
     - trigger: state
       entity_id:
-        - binary_sensor.octopus_energy_a_7e9f23d1_intelligent_dispatching
+        - binary_sensor.octopus_energy_electricity_20e5176819_2000052794266_off_peak
       from: 'off'
       to: 'on'
     - trigger: time_pattern
@@ -1261,7 +1262,7 @@
       after: 09:00:00
       before: '21:00:00'
     - condition: state
-      entity_id: binary_sensor.octopus_energy_a_7e9f23d1_intelligent_dispatching
+      entity_id: binary_sensor.octopus_energy_electricity_20e5176819_2000052794266_off_peak
       state: 'on'
   actions:
     - action: input_datetime.set_datetime
@@ -1480,7 +1481,7 @@
   triggers:
     - trigger: state
       entity_id:
-        - binary_sensor.octopus_energy_a_7e9f23d1_intelligent_dispatching
+        - binary_sensor.octopus_energy_electricity_20e5176819_2000052794266_off_peak
       from: 'off'
       to: 'on'
   conditions:
@@ -1613,7 +1614,7 @@
   triggers:
     - trigger: state
       entity_id:
-        - binary_sensor.octopus_energy_a_7e9f23d1_intelligent_dispatching
+        - binary_sensor.octopus_energy_electricity_20e5176819_2000052794266_off_peak
       from: 'off'
       to: 'on'
   conditions: []
@@ -1630,7 +1631,7 @@
   triggers:
     - trigger: state
       entity_id:
-        - binary_sensor.octopus_energy_a_7e9f23d1_intelligent_dispatching
+        - binary_sensor.octopus_energy_electricity_20e5176819_2000052794266_off_peak
       from: 'on'
       to: 'off'
   conditions: []
