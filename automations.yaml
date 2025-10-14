@@ -943,7 +943,7 @@
         hours: 0
         minutes: 2
         seconds: 0
-      above: 18
+      above: 15
   conditions:
     - condition: state
       entity_id: binary_sensor.octopus_energy_a_7e9f23d1_intelligent_dispatching
