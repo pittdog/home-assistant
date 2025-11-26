@@ -955,8 +955,8 @@
         title: Spa first time fill
         message: Spa filled up for first time over 18hrs to heat, so will heat overnight
     - action: input_boolean.turn_on
-      metadata: { }
-      data: { }
+      metadata: {}
+      data: {}
       target:
         entity_id: input_boolean.spa_water_top_up
   mode: single
@@ -1624,6 +1624,12 @@
       data: {}
       target:
         entity_id: switch.wiser_dehumidier_switch
+    - action: switch.turn_on
+      metadata: {}
+      data: {}
+      target:
+        entity_id:
+          - switch.localbytes_plug_pm_67fa6a_localbytes_plug_pm_67fa6a
   mode: single
 - id: '1739029430054'
   alias: Off peak plug turn off
@@ -1641,6 +1647,13 @@
       data: {}
       target:
         entity_id: switch.wiser_dehumidier_switch
+    - action: switch.turn_off
+      metadata: {}
+      data: {}
+      target:
+        entity_id:
+          - switch.wiser_dehumidier_switch
+          - switch.localbytes_plug_pm_67fa6a_localbytes_plug_pm_67fa6a
   mode: single
 - id: '1741689589106'
   alias: Mower - Open Gate
