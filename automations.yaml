@@ -1630,6 +1630,7 @@
       target:
         entity_id:
           - switch.localbytes_plug_pm_67fa6a_localbytes_plug_pm_67fa6a
+      enabled: false
   mode: single
 - id: '1739029430054'
   alias: Off peak plug turn off
@@ -1716,4 +1717,67 @@
       device_id: f026eddf710c85a131f11c071f912d81
       entity_id: 6bcc6e79f9145622d02e31a5704f1199
       domain: switch
+  mode: single
+- id: '1764174115271'
+  alias: Heat Gym
+  description: ''
+  triggers:
+    - device_id: 07b185e93f529acad97a9f2c47b1bdbc
+      domain: wiser
+      entity_id: climate.wiser_gym
+      type: started_heating
+      trigger: device
+    - device_id: 07b185e93f529acad97a9f2c47b1bdbc
+      domain: wiser
+      entity_id: climate.wiser_gym
+      type: boosted
+      trigger: device
+      enabled: false
+  conditions:
+    - condition: state
+      entity_id: binary_sensor.octopus_energy_electricity_20e5176819_2000052794266_off_peak
+      state:
+        - 'on'
+      enabled: true
+  actions:
+    - action: switch.turn_on
+      metadata: {}
+      data: {}
+      target:
+        entity_id: switch.wiser_gym_heater_switch
+  mode: single
+- id: '1764174501231'
+  alias: Gym Stop Heat
+  description: ''
+  triggers:
+    - device_id: 07b185e93f529acad97a9f2c47b1bdbc
+      domain: wiser
+      entity_id: climate.wiser_gym
+      type: stopped_heating
+      trigger: device
+  conditions: []
+  actions:
+    - action: switch.turn_off
+      metadata: {}
+      data: {}
+      target:
+        entity_id: switch.wiser_gym_heater_switch
+  mode: single
+- id: '1764176672049'
+  alias: Gym Heat Boosted
+  description: ''
+  triggers:
+    - device_id: 07b185e93f529acad97a9f2c47b1bdbc
+      domain: wiser
+      entity_id: climate.wiser_gym
+      type: boosted
+      trigger: device
+      enabled: true
+  conditions: []
+  actions:
+    - action: switch.turn_on
+      metadata: {}
+      data: {}
+      target:
+        entity_id: switch.wiser_gym_heater_switch
   mode: single
