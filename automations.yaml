@@ -170,16 +170,15 @@
     - trigger: template
       value_template: '{{ states(''sensor.daily_hot_water_offpeak'')|float >= states(''input_number.night_immersion_target'')|float
       }}'
-    - trigger: state
-      entity_id:
-        - binary_sensor.octopus_energy_electricity_20e5176819_2000052794266_off_peak
-      from: 'on'
-      to: 'off'
   conditions:
     - condition: time
       after: 00:30:00
       before: 05:30:00
       enabled: false
+    - condition: state
+      entity_id: binary_sensor.octopus_energy_electricity_20e5176819_2000052794266_off_peak
+      state:
+        - 'off'
   actions:
     - repeat:
         sequence:
@@ -200,7 +199,7 @@
 - id: '1283957837432'
   alias: Sinks - Hot Water - Stop immersion heater (low solar or night end)
   description: ''
-  trigger:
+  triggers:
     - trigger: state
       entity_id: binary_sensor.request_3kw_immersion
       for:
@@ -208,6 +207,7 @@
         minutes: 0
         seconds: 45
       to: 'off'
+      enabled: false
     - trigger: time
       at: 01:25:00
     - trigger: time
@@ -220,11 +220,12 @@
       at: 05:25:00
     - trigger: time
       at: '19:15:00'
-  condition:
+      enabled: false
+  conditions:
     - condition: time
       after: 01:15:00
       before: '19:15:00'
-  action:
+  actions:
     - repeat:
         sequence:
           - type: turn_off
@@ -1187,7 +1188,7 @@
   triggers:
     - trigger: sun
       event: sunset
-      offset: 00:25:00
+      offset: 00:00:00
     - trigger: sun
       event: sunrise
       offset: -01:15:00
@@ -1569,7 +1570,11 @@
       entity_id: 0096e7894c8e7de8402fe3bcbcded89d
       domain: switch
       trigger: device
-  conditions: []
+  conditions:
+    - condition: state
+      entity_id: binary_sensor.octopus_energy_electricity_20e5176819_2000052794266_off_peak
+      state:
+        - 'on'
   actions:
     - action: button.press
       metadata: {}
@@ -1623,14 +1628,14 @@
       metadata: {}
       data: {}
       target:
-        entity_id: switch.wiser_dehumidier_switch
+        entity_id: switch.wiser_gym_heater_switch
     - action: switch.turn_on
       metadata: {}
       data: {}
       target:
         entity_id:
           - switch.localbytes_plug_pm_67fa6a_localbytes_plug_pm_67fa6a
-      enabled: false
+      enabled: true
   mode: single
 - id: '1739029430054'
   alias: Off peak plug turn off
@@ -1647,7 +1652,7 @@
       metadata: {}
       data: {}
       target:
-        entity_id: switch.wiser_dehumidier_switch
+        entity_id: switch.wiser_gym_heater_switch
     - action: switch.turn_off
       metadata: {}
       data: {}
@@ -1780,4 +1785,22 @@
       data: {}
       target:
         entity_id: switch.wiser_gym_heater_switch
+  mode: single
+- id: '1768460368349'
+  alias: Kitchen Heating On
+  description: ''
+  triggers:
+    - device_id: 9c80a2ef1e815eba3f9bc56ffd0d7099
+      domain: wiser
+      entity_id: climate.wiser_kitchen
+      type: started_heating
+      trigger: device
+  conditions: []
+  actions:
+    - action: persistent_notification.create
+      metadata: {}
+      data:
+        notification_id: alert_kitchen_heating_on
+        title: Kitchen Heating On
+        message: The kitchen heating is on
   mode: single
