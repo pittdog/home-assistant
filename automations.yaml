@@ -885,21 +885,36 @@
       to: 'on'
   conditions: []
   actions:
-    - action: climate.set_temperature
-      metadata: {}
-      data:
-        temperature: '{% set temp_increase_value = 2 if states(''sensor.openweathermap_feels_like_temperature'')
-        | float < 10 else 1 %} {% set target_temp = states(''sensor.spa_weather_compensated_setpoint'')
-        | float | round(0) + temp_increase_value %}  {% set target_temp_capped = target_temp
-        if target_temp <= 40 else 40 %} {{ target_temp_capped }}'
-      target:
-        entity_id: climate.spa_thermostat
-    - action: climate.set_hvac_mode
-      metadata: {}
-      data:
-        hvac_mode: heat
-      target:
-        entity_id: climate.spa_thermostat
+    - repeat:
+        sequence:
+          - action: switch.turn_on
+            metadata: { }
+            target:
+              entity_id: switch.heat_mode
+            data: { }
+          - action: climate.set_temperature
+            metadata: { }
+            data:
+              temperature: '{% set temp_increase_value = 2 if states(''sensor.openweathermap_feels_like_temperature'')
+              | float < 10 else 1 %} {% set target_temp = states(''sensor.spa_weather_compensated_setpoint'')
+              | float | round(0) + temp_increase_value %}  {% set target_temp_capped = target_temp
+              if target_temp <= 40 else 40 %} {{ target_temp_capped }}'
+            target:
+              entity_id: climate.spa_thermostat
+          - action: climate.set_hvac_mode
+            metadata: { }
+            data:
+              hvac_mode: heat
+            target:
+              entity_id: climate.spa_thermostat
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 30
+        until:
+          - condition: template
+            value_template: '{{ states(''climate.spa_thermostat'') == ''heat'' }} or
+            repeat.index == 3 }}'
   mode: single
 - id: '1733731466034'
   alias: Peak Tariff Heat Hot Tub
