@@ -888,21 +888,24 @@
     - repeat:
         sequence:
           - action: switch.turn_on
-            metadata: { }
+            metadata: {}
             target:
               entity_id: switch.heat_mode
-            data: { }
+            data: {}
           - action: climate.set_temperature
-            metadata: { }
+            metadata: {}
             data:
-              temperature: '{% set temp_increase_value = 2 if states(''sensor.openweathermap_feels_like_temperature'')
-              | float < 10 else 1 %} {% set target_temp = states(''sensor.spa_weather_compensated_setpoint'')
-              | float | round(0) + temp_increase_value %}  {% set target_temp_capped = target_temp
-              if target_temp <= 40 else 40 %} {{ target_temp_capped }}'
+              temperature: "{% set feels_like = states(\"sensor.openweathermap_feels_like_temperature\")
+            | float %}\n{% if feels_like < 10 %}\n  {% set boost = 2 %}\n{% elif feels_like
+            < 18 %}\n  {% set boost = 1 %}\n{% elif feels_like < 23 %}\n  {% set boost
+            = 0.5 %}\n{% else %}\n  {% set boost = 0 %}\n{% endif %}\n{% set target_temp
+            = states(\"sensor.spa_weather_compensated_setpoint\") | float | round(1)
+            + boost %}\n{% set target_temp_capped = target_temp if target_temp <=
+            40 else 40 %}\n{{ target_temp_capped }}"
             target:
               entity_id: climate.spa_thermostat
           - action: climate.set_hvac_mode
-            metadata: { }
+            metadata: {}
             data:
               hvac_mode: heat
             target:
@@ -912,9 +915,11 @@
               minutes: 0
               seconds: 30
         until:
-          - condition: template
-            value_template: '{{ states(''climate.spa_thermostat'') == ''heat'' }} or
-            repeat.index == 3 }}'
+          - condition: device
+            type: is_on
+            device_id: b81d1e055479a535ec428ef2f24f44c9
+            entity_id: 89574fa5b8cdc46b734c5cef0184d199
+            domain: switch
   mode: single
 - id: '1733731466034'
   alias: Peak Tariff Heat Hot Tub
@@ -1152,10 +1157,6 @@
       entity_id: input_boolean.spa_water_top_up
       state: 'on'
   actions:
-    - type: turn_on
-      device_id: b81d1e055479a535ec428ef2f24f44c9
-      entity_id: 89574fa5b8cdc46b734c5cef0184d199
-      domain: switch
     - action: switch.turn_off
       metadata: {}
       data: {}
@@ -1678,7 +1679,7 @@
   mode: single
 - id: '1741689589106'
   alias: Mower - Open Gate
-  description: ''
+  description: Close gate first then open for mower at 10am Tue/Fri
   triggers:
     - trigger: time
       at: '10:00:00'
@@ -1688,36 +1689,28 @@
         - tue
         - fri
   actions:
-    - type: turn_on
-      device_id: f026eddf710c85a131f11c071f912d81
-      entity_id: 6bcc6e79f9145622d02e31a5704f1199
-      domain: switch
+    - entity_id: switch.sonoff_1000df213d
+      action: switch.turn_on
     - delay:
-        hours: 0
-        minutes: 0
         seconds: 30
-        milliseconds: 0
-    - type: turn_on
-      device_id: 5a56916572c31eabc9627f8a9d98423a
-      entity_id: f4ab37bb3910c2da81af1d33f8fe99b7
-      domain: switch
+    - entity_id: switch.sonoff_1000e1ab22
+      action: switch.turn_on
   mode: single
 - id: '1741689691316'
   alias: Mower - Close gates
-  description: ''
+  description: Close back gate when Navimow docks on Tue/Fri
   triggers:
-    - trigger: time
-      at: '12:00:00'
+    - trigger: state
+      entity_id: lawn_mower.navimow_h500
+      to: docked
   conditions:
     - condition: time
       weekday:
         - tue
         - fri
   actions:
-    - type: turn_on
-      device_id: f026eddf710c85a131f11c071f912d81
-      entity_id: 6bcc6e79f9145622d02e31a5704f1199
-      domain: switch
+    - entity_id: switch.sonoff_1000df213d
+      action: switch.turn_on
   mode: single
 - id: '1745401782089'
   alias: Close Gates When Charging Tesla
@@ -1818,4 +1811,132 @@
         notification_id: alert_kitchen_heating_on
         title: Kitchen Heating On
         message: The kitchen heating is on
+  mode: single
+- id: bella_sunrise_alarm
+  alias: Bella Sunrise Alarm
+  description: Sunrise + now/next voice prompts for Bella Mon-Fri
+  triggers:
+    - platform: time
+      at: 05:30:00
+  conditions:
+    - condition: time
+      weekday:
+        - mon
+        - tue
+        - wed
+        - thu
+        - fri
+  actions:
+    - target:
+        entity_id: light.bella_s_light
+      data:
+        rgb_color:
+          - 80
+          - 0
+          - 0
+        brightness: 3
+        transition: 0
+      action: light.turn_on
+    - delay:
+        minutes: 8
+    - target:
+        entity_id: light.bella_s_light
+      data:
+        rgb_color:
+          - 255
+          - 80
+          - 0
+        brightness: 51
+        transition: 480
+      action: light.turn_on
+    - delay:
+        minutes: 7
+    - target:
+        entity_id: light.bella_s_light
+      data:
+        rgb_color:
+          - 255
+          - 180
+          - 20
+        brightness: 153
+        transition: 300
+      action: light.turn_on
+    - target:
+        entity_id: media_player.bella_s_echo_pop
+      data:
+        volume_level: 0.5
+      action: media_player.volume_set
+    - data:
+        entity_id: media_player.bella_s_echo_pop
+        message: Good morning Bella. Now it is time to wake up.
+        language: en-GB
+      action: tts.cloud_say
+    - delay:
+        minutes: 3
+    - target:
+        entity_id: light.bella_s_light
+      data:
+        color_temp: 300
+        brightness: 200
+        transition: 120
+      action: light.turn_on
+    - target:
+        entity_id: media_player.bella_s_echo_pop
+      data:
+        volume_level: 0.6
+      action: media_player.volume_set
+    - data:
+        entity_id: media_player.bella_s_echo_pop
+        message: Bella, now sit up in bed. Next, you need to get dressed.
+        language: en-GB
+      action: tts.cloud_say
+    - delay:
+        minutes: 2
+    - target:
+        entity_id: light.bella_s_light
+      data:
+        color_temp: 250
+        brightness: 255
+        transition: 60
+      action: light.turn_on
+    - target:
+        entity_id: media_player.bella_s_echo_pop
+      data:
+        volume_level: 0.7
+      action: media_player.volume_set
+    - data:
+        entity_id: media_player.bella_s_echo_pop
+        message: Bella, now get out of bed and get dressed. Next is breakfast.
+        language: en-GB
+      action: tts.cloud_say
+  mode: single
+- id: bella_light_off
+  alias: Bella Light Off at 9:30pm
+  description: Turn off Bellas light at 9:30pm daily
+  triggers:
+    - platform: time
+      at: '21:30:00'
+  actions:
+    - target:
+        entity_id: light.bella_s_light
+      data:
+        transition: 60
+      action: light.turn_off
+  mode: single
+- id: bella_light_keep_on_morning
+  alias: Bella Light - Keep On During Morning
+  description: If Bella turns her light off between 6am and 8:30am, turn it back on
+  triggers:
+    - platform: state
+      entity_id: light.bella_s_light
+      to: 'off'
+  conditions:
+    - condition: time
+      after: 06:00:00
+      before: 08:30:00
+  actions:
+    - delay: 00:00:05
+    - target:
+        entity_id: light.bella_s_light
+      action: light.turn_on
   mode: single
