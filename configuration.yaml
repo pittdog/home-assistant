@@ -626,6 +626,104 @@ template:
             None
           {% endif %}
 
+      - name: "Spa Heat Time"
+        unique_id: a189ddea-e8e2-4882-9813-643fe122d92f
+        unit_of_measurement: "hours"
+        state: >-
+          {% set initial_temp = state_attr('climate.spa_thermostat','current_temperature')|float %}
+          {% set final_temp = state_attr('climate.spa_thermostat','temperature')|float %}
+          {% set water_mass = 1550 %}
+          {% set heating_power = 3000 %}
+          {% set efficiency = 0.9 %}
+          {% set delta_t = final_temp - initial_temp %}
+          {% set heat_energy = water_mass * 4184 * delta_t %}
+          {% set heat_time_hours = heat_energy / (heating_power * efficiency * 3600) %}
+          {{ heat_time_hours|round(2) }}
+
+      - name: "Spa Weather Compensated Setpoint"
+        unique_id: 668d0ac4-c6ca-484a-a6c4-2105349d4745
+        unit_of_measurement: "C"
+        state: >-
+          {% set outside_temp = states('sensor.openweathermap_feels_like_temperature')|float %}
+          {% set is_1hr_before_sunset = (is_state('sun.sun','above_horizon') and (as_timestamp(states.sun.sun.attributes.next_setting) - as_timestamp(now())) | float <= 3600) or is_state('sun.sun', 'below_horizon') %}
+          {% set temp_20c = 36 %}
+          {% set temp_0c = 38.5 %}
+          {% set max_temp = 40 %}
+          {% set min_temp = 25 %}
+          {% set weather_compensated_setpoint = ((((temp_20c - temp_0c) / 20) * outside_temp) + temp_0c ) | round(1, "half", default) %}
+          {% set sunset_adjusted_setpoint = weather_compensated_setpoint + (1 if not is_state('weather.openweathermap', 'sunny') or is_1hr_before_sunset and states('sensor.openweathermap_feels_like_temperature') | float > 10 else 0) %}
+          {% if sunset_adjusted_setpoint > max_temp %}
+            {{ max_temp }}
+          {% elif sunset_adjusted_setpoint < min_temp %}
+            {{ min_temp}}
+          {% else %}
+            {{ sunset_adjusted_setpoint }}
+          {% endif %}
+
+      - name: "Daily Spa Peak Cost"
+        unique_id: bc06f39f-38e0-4d32-9abc-e3c8a9e724bb
+        unit_of_measurement: "£"
+        state: >-
+          {{ states('sensor.daily_spa_peak') | float * states('input_number.electricity_tariff_cost_peak') | float }}
+
+      - name: "Daily Spa Off Peak Cost"
+        unique_id: 394fbe85-fee5-4a5b-a5d0-b055693c9b9b
+        unit_of_measurement: "£"
+        state: >-
+          {{ states('sensor.daily_spa_offpeak') | float * states('input_number.electricity_tariff_cost_offpeak') | float }}
+
+      - name: "Daily Spa Cost"
+        unique_id: d4eab574-6fc7-44cf-8054-bb5d1873554f
+        unit_of_measurement: "£"
+        state: >-
+          {{ states('sensor.daily_spa_peak') | float * states('input_number.electricity_tariff_cost_peak') | float + states('sensor.daily_spa_offpeak') | float * states('input_number.electricity_tariff_cost_offpeak') | float }}
+
+      - name: "Monthly Spa Cost"
+        unique_id: 0b5e6965-ff97-4e65-bb61-e07089e29484
+        unit_of_measurement: "£"
+        state: >-
+          {{ states('sensor.monthly_spa_peak') | float * states('input_number.electricity_tariff_cost_peak') | float + states('sensor.monthly_spa_offpeak') | float * states('input_number.electricity_tariff_cost_offpeak') | float }}
+
+      - name: "Next Off Peak Start"
+        unique_id: 60f31dd2-7db9-42ed-a592-3abb8e38d7e4
+        state: >-
+          {{ state_attr('binary_sensor.octopus_energy_electricity_20e5176819_2000052794266_off_peak', 'next_start') }}
+
+      - name: "Next Off Peak End"
+        unique_id: f85d6def-fb51-4064-8052-bb097c2022ba
+        state: >-
+          {{ state_attr('binary_sensor.octopus_energy_electricity_20e5176819_2000052794266_off_peak', 'next_end') }}
+
+      - name: "Current Off Peak Start"
+        unique_id: 518bf0a1-c5e3-4bf2-ab24-dbb6c8e774a0
+        state: >-
+          {{ state_attr('binary_sensor.octopus_energy_electricity_20e5176819_2000052794266_off_peak', 'current_start') }}
+
+      - name: "Current Off Peak End"
+        unique_id: 66081380-0668-415c-9c7e-fcb8533c3e52
+        state: >-
+          {{ state_attr('binary_sensor.octopus_energy_electricity_20e5176819_2000052794266_off_peak', 'current_end') }}
+
+      - name: "Tesla Wall Connector Total Energy"
+        unique_id: c64f6ef6-f14c-42d4-be65-b0aa25c50fbf
+        unit_of_measurement: "kWh"
+        state: >-
+          {{ states('sensor.tesla_wall_connector_energy') | float / 1000 }}
+
+      - name: "Spa Realtime Energy from Grid"
+        unique_id: 5a9755b2-4558-4930-9390-759caa2e9d8d
+        unit_of_measurement: "W"
+        state: >-
+          {% set grid_power_watts = states('sensor.solax_local_grid_power') | float | default(0) %}
+          {% set spa_power_watts = states('sensor.wifi_dual_meter_spa_realtime_power') | float | default(0) %}
+          {% if grid_power_watts >= spa_power_watts %}
+            {{ spa_power_watts }}
+          {% elif grid_power_watts > 0 %}
+            {{ grid_power_watts }}
+          {% else %}
+            0
+          {% endif %}
+
   - binary_sensor:
       # Logic divided into base conditions (bc) that apply regardless, and battery/solar specific
       - name: "Request 3kW Immersion"
