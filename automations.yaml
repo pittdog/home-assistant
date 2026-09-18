@@ -1061,7 +1061,7 @@
     - action: climate.set_temperature
       metadata: {}
       data:
-        temperature: '{{ states(''sensor.spa_weather_compensated_setpoint'') | float
+        temperature: '{{ states(''sensor.spa_weather_compensated_setpoint'') | float(38.0)
         }}'
       target:
         entity_id: climate.spa_thermostat
