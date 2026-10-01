@@ -376,67 +376,67 @@
         timestamp: '{{ now().timestamp() }}'
   mode: single
 - id: '2000'
-  alias: Octopus - Saving Session joiner
-  description: Automatically join Octopus Saving Session Events
+  alias: Octopus - Power Down Session joiner
+  description: Automatically join Octopus Power Down Session Events
   triggers:
     - trigger: event
-      event_type: octopus_energy_new_octoplus_saving_session
+      event_type: octopus_energy_new_octoplus_power_down_event
   conditions:
     - condition: template
-      value_template: '{{ (state_attr(''event.octopus_energy_a_7e9f23d1_octoplus_saving_session_events'',
-      ''available_events'') | selectattr(''code'', ''eq'', trigger.event.data["event_code"])
-      | list | map(attribute=''octopoints_per_kwh'') | first) >= 240}}'
+      value_template: '{{ (state_attr("event.octopus_energy_a_7e9f23d1_octoplus_power_down_events",
+      "available_events") | selectattr("code", "eq", trigger.event.data["event_code"])
+      | list | map(attribute="octopoints_per_kwh") | first) >= 240}}'
   actions:
     - action: octopus_energy.join_octoplus_saving_session_event
       data:
         event_code: '{{ trigger.event.data["event_code"] }}'
       target:
-        entity_id: event.octopus_energy_a_7e9f23d1_octoplus_saving_session_events
+        entity_id: event.octopus_energy_a_7e9f23d1_octoplus_power_down_events
     - action: persistent_notification.create
       data:
         notification_id: alert_saving_session
-        title: Octopus Saving Sessions Updated
-        message: 'Joined new Octopus Energy saving session. It starts at {{ trigger.event.data["event_start"].strftime(''%H:%M'')
+        title: Octopus Power Down Session Updated
+        message: 'Joined new Octopus Energy Power Down session. It starts at {{ trigger.event.data["event_start"].strftime("%H:%M")
         }} on {{ trigger.event.data["event_start"].day }}/{{ trigger.event.data["event_start"].month
         }}
 
         '
   mode: single
 - id: '2001'
-  alias: Octopus - Is there a Saving Session today?
+  alias: Octopus - Is there a Power Down Session today?
   description: Sets the today flag and copies over the start time - this in turn should
     trigger the 3001 automation for pre-charging
-  trigger:
+  triggers:
     - trigger: time_pattern
       minutes: /30
     - trigger: state
       entity_id:
-        - binary_sensor.octopus_energy_a_7e9f23d1_octoplus_saving_sessions
+        - binary_sensor.octopus_energy_a_7e9f23d1_octoplus_power_down
     - trigger: state
       entity_id:
-        - binary_sensor.octopus_energy_a_7e9f23d1_octoplus_saving_sessions
+        - binary_sensor.octopus_energy_a_7e9f23d1_octoplus_power_down
       attribute: next_joined_event_start
-  action:
+  actions:
     - action: input_select.select_option
       target:
         entity_id: input_select.saving_session_today
       data:
-        option: '{% set current_event = state_attr(''binary_sensor.octopus_energy_a_7e9f23d1_octoplus_saving_sessions'',
-        ''current_joined_event_start'') %} {% set next_event = state_attr(''binary_sensor.octopus_energy_a_7e9f23d1_octoplus_saving_sessions'',
-        ''next_joined_event_start'') %} {% set upcoming_event = current_event if (current_event
-        != None) else next_event %} {{ ''yes'' if (upcoming_event != None and upcoming_event.strftime(''%j'')
-        == now().strftime(''%j'')) else ''no'' }}
+        option: '{% set current_event = state_attr("binary_sensor.octopus_energy_a_7e9f23d1_octoplus_power_down",
+        "current_joined_event_start") %} {% set next_event = state_attr("binary_sensor.octopus_energy_a_7e9f23d1_octoplus_power_down",
+        "next_joined_event_start") %} {% set upcoming_event = current_event if (current_event
+        != None) else next_event %} {{ "yes" if (upcoming_event != None and upcoming_event.strftime("%j")
+        == now().strftime("%j")) else "no" }}
 
         '
     - action: input_datetime.set_datetime
       target:
         entity_id: input_datetime.saving_session_start
       data:
-        datetime: '{% set current_event = state_attr(''binary_sensor.octopus_energy_a_7e9f23d1_octoplus_saving_sessions'',
-        ''current_joined_event_start'') %} {% set next_event = state_attr(''binary_sensor.octopus_energy_a_7e9f23d1_octoplus_saving_sessions'',
-        ''next_joined_event_start'') %} {% set upcoming_event = current_event if (current_event
-        != None) else next_event %} {{ (now() + timedelta(days=7)).strftime(''%Y-%m-%d
-        00:00:00'') if (upcoming_event == None) else upcoming_event }}
+        datetime: '{% set current_event = state_attr("binary_sensor.octopus_energy_a_7e9f23d1_octoplus_power_down",
+        "current_joined_event_start") %} {% set next_event = state_attr("binary_sensor.octopus_energy_a_7e9f23d1_octoplus_power_down",
+        "next_joined_event_start") %} {% set upcoming_event = current_event if (current_event
+        != None) else next_event %} {{ (now() + timedelta(days=7)).strftime("%Y-%m-%d
+        00:00:00") if (upcoming_event == None) else upcoming_event }}
 
         '
   mode: single
@@ -608,7 +608,7 @@
         seconds: 0
     - trigger: state
       entity_id:
-        - binary_sensor.octopus_energy_a_7e9f23d1_octoplus_saving_sessions
+        - binary_sensor.octopus_energy_a_7e9f23d1_octoplus_power_down
       from: 'on'
       to: 'off'
       for:
@@ -617,8 +617,8 @@
         seconds: 30
   conditions:
     - condition: template
-      value_template: '{{ (states(''sensor.solax_local_inverter_mode'') == ''Manual''
-      or states(''sensor.solax_local_battery_chd2_enabled'')|bool==true) }}'
+      value_template: '{{ (states("sensor.solax_local_inverter_mode") == "Manual" or
+      states("sensor.solax_local_battery_chd2_enabled")|bool==true) }}'
   actions:
     - action: automation.turn_off
       data:
@@ -658,8 +658,8 @@
                 - sensor.solax_rest_local_settings
         until:
           - condition: template
-            value_template: '{{ (states(''sensor.solax_local_battery_chd2_enabled'')|bool==false
-          and states(''sensor.solax_local_inverter_mode'') == ''Self Use'') or repeat.index
+            value_template: '{{ (states("sensor.solax_local_battery_chd2_enabled")|bool==false
+          and states("sensor.solax_local_inverter_mode") == "Self Use") or repeat.index
           == 3 }}'
   mode: single
 - id: '1029376657476'
@@ -1080,12 +1080,12 @@
       domain: light
   mode: single
 - id: '1733943804919'
-  alias: Saving Sessions Start - Turn off Spa
+  alias: Power Down Session Start - Turn off Spa
   description: ''
   triggers:
     - trigger: state
       entity_id:
-        - binary_sensor.octopus_energy_a_7e9f23d1_octoplus_saving_sessions
+        - binary_sensor.octopus_energy_a_7e9f23d1_octoplus_power_down
       from: 'off'
       to: 'on'
       for:
@@ -1100,12 +1100,12 @@
       domain: switch
   mode: single
 - id: '1733943856968'
-  alias: Saving Sessions Finish - Turn on Spa
+  alias: Power Down Session Finish - Turn on Spa
   description: ''
   triggers:
     - trigger: state
       entity_id:
-        - binary_sensor.octopus_energy_a_7e9f23d1_octoplus_saving_sessions
+        - binary_sensor.octopus_energy_a_7e9f23d1_octoplus_power_down
       from: 'on'
       to: 'off'
       for:
